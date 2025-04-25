@@ -39,7 +39,7 @@ const blueEnemyImage = new Image();
 blueEnemyImage.src = 'path_to_matsunaga_image.jpg'; // 松永の写真
 
 const xIcon = new Image();
-xIcon.src = 'path_to_x_icon.jpg'; // Xアイコン
+xIcon.src = 'path_to_x_icon.PNG'; // Xアイコン
 
 let xIconItems = []; // Xアイコンのアイテムリスト
 
