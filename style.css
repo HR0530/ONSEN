@@ -1,73 +1,51 @@
 body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    color: white;
-}
-
-.start-screen {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-h1 {
-    font-size: 48px;
-    margin-bottom: 10px; /* 上のテキストとの間隔を調整 */
-}
-
-h2 {
-    font-size: 48px;
-    margin-top: 0; /* 下のテキストとの間隔を調整 */
-}
-
-button {
-    background-color: #ff6347;
-    color: white;
-    font-size: 24px;
-    padding: 15px 30px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 20px;
-}
-
-button:hover {
-    background-color: #e53e34;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
 }
 
 .game-container {
-    position: relative;
+  position: relative;
 }
 
 canvas {
-    width: 100vw;
-    height: 100vh;
-    background-color: #000;
-    display: block;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  display: block;
 }
 
 #gameoverImage {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 300px;
-    z-index: 2;
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 2;
 }
 
 #gameoverText {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 24px;
-    z-index: 2;
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 24px;
+  z-index: 2;
+}
+
+#title {
+  color: white;
+  font-size: 48px;
+  text-align: center;
+  font-weight: bold;
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
 }
