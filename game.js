@@ -39,7 +39,7 @@ const blueEnemyImage = new Image();
 blueEnemyImage.src = 'path_to_matsunaga_image.jpg'; // 松永の写真
 
 const xIcon = new Image();
-xIcon.src = 'path_to_x_icon.PNG'; // Xアイコン
+xIcon.src = 'path_to_x_icon.jpg'; // Xアイコン
 
 let xIconItems = []; // Xアイコンのアイテムリスト
 
@@ -61,7 +61,7 @@ function drawText(text, x, y, size = 20, color = 'white', align = 'left') {
 }
 
 function drawLives() {
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < lives; i++) {
     drawImage({ x: canvas.width - 80 + i * 20, y: 30, width: 20, height: 20 }, xIcon); // Xアイコンをライフとして描画
   }
 }
@@ -69,13 +69,14 @@ function drawLives() {
 // アイテム生成
 function spawnEnemy() {
   if (Math.random() < enemySpawnRate) {
+    const enemyType = Math.random() < 0.2 ? 'blue' : 'red'; // 松永は教科書の5分の1の確率
     enemies.push({
       x: Math.random() * (canvas.width - 40),
       y: -40,
       width: 40,
       height: 40,
       dx: Math.random() > 0.5 ? 2 : -2,
-      color: 'red' // 教科書の色
+      color: enemyType // こちらが教科書か松永かを決める
     });
   }
 }
@@ -117,24 +118,16 @@ function handleXIconCollision() {
   }
 }
 
-function checkBlueCharacterCollision() {
+function handleEnemyCollision() {
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
     if (e.color === 'blue' && player.x < e.x + e.width && player.x + player.width > e.x && player.y < e.y + e.height && player.y + player.height > e.y) {
       lives -= 1;
-      invincibleTimer = 60;
       if (lives <= 0) isGameOver = true;
-      enemies.splice(i, 1); // 青いキャラが当たった場合は消す
-    }
-  }
-}
-
-function handleTextbookCollision() {
-  for (let i = enemies.length - 1; i >= 0; i--) {
-    const e = enemies[i];
-    if (e.color === 'red' && player.x < e.x + e.width && player.x + player.width > e.x && player.y < e.y + e.height && player.y + player.height > e.y) {
-      enemies.splice(i, 1); // 教科書に当たった場合は消す
-      score += 1; // ポイントは1ポイントずつ増加
+      enemies.splice(i, 1); // 松永に当たった場合は消す
+    } else if (e.color === 'red' && player.x < e.x + e.width && player.x + player.width > e.x && player.y < e.y + e.height && player.y + player.height > e.y) {
+      score += 1; // 教科書に当たった場合はスコアを加算
+      enemies.splice(i, 1); // 教科書を消す
     }
   }
 }
@@ -195,9 +188,6 @@ function update() {
     e.y += enemySpeed;
     e.x += e.dx;
     if (e.x < 0 || e.x > canvas.width - e.width) e.dx *= -1;
-    if (Math.random() < 0.2) {
-      e.color = Math.random() < 0.2 ? 'blue' : 'red'; // 5分の1で青いキャラ
-    }
   });
 
   bullets.forEach(b => {
@@ -205,8 +195,7 @@ function update() {
   });
   bullets = bullets.filter(b => b.y > 0);
 
-  checkBlueCharacterCollision(); // 青いキャラとの衝突チェック
-  handleTextbookCollision(); // 教科書の衝突チェック
+  handleEnemyCollision(); // 敵との衝突チェック
   handleXIconCollision(); // Xアイコンの衝突チェック
 
   // キャラやアイテムの描画
