@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ぎんとがモテ男になるように</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ぎんとがモテ男になるように</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="start-screen" class="start-screen">
-        <h1>ぎんとが モテ男に</h1>
-        <h2>なるように</h2>
-    </div>
-    <div id="game-screen" class="game-container" style="display: none;">
-        <canvas id="gameCanvas"></canvas>
-        <img id="gameoverImage" src="path_to_gameover_image.jpg" alt="Game Over" style="display: none;">
-        <div id="gameoverText" style="display: none;">ゲームオーバー</div>
-    </div>
-    <script src="game.js"></script>
+  <div class="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <img id="gameoverImage" src="gameover_image.jpg" style="display: none;">
+    <div id="gameoverText" style="display: none;">GAME OVER</div>
+  </div>
+  <script src="game.js"></script>
 </body>
 </html>
