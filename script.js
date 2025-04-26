@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// 画像
+// 画像の読み込み
 const gintoImg = new Image();
 gintoImg.src = "path_to_ginto_image.jpg";
 const redImg = new Image();
@@ -31,6 +31,7 @@ let enemySpeed = 2;
 let enemySpawnRate = 0.02;
 let gameoverImg = document.getElementById("gameoverImage");
 
+// テキスト描画関数
 function drawText(text, x, y, size = 24, color = "white", align = "center") {
   ctx.font = `${size}px Arial`;
   ctx.fillStyle = color;
@@ -38,12 +39,24 @@ function drawText(text, x, y, size = 24, color = "white", align = "center") {
   ctx.fillText(text, x, y);
 }
 
+// 残機の表示
 function drawLives() {
   for (let i = 0; i < 3; i++) {
     drawText(i < lives ? "♥" : "♡", canvas.width - 80 + i * 20, 30, 24, "pink", "left");
   }
 }
 
+// 弾の発射
+function shoot() {
+  bullets.push({
+    x: player.x + player.width / 2 - 2,
+    y: player.y,
+    width: 4,
+    height: 10
+  });
+}
+
+// 敵の生成
 function spawnEnemy() {
   if (Math.random() < enemySpawnRate) {
     const isMatsunaga = Math.random() < 1 / 3;
@@ -59,6 +72,7 @@ function spawnEnemy() {
   }
 }
 
+// 回復アイテムの生成
 function spawnRecoveryItem() {
   if (Math.random() < 0.0001) {
     recoveryItems.push({
@@ -71,17 +85,7 @@ function spawnRecoveryItem() {
   }
 }
 
-function shoot() {
-  bullets.push({
-    x: player.x + player.width / 2 - 2,
-    y: player.y,
-    width: 4,
-    height: 10,
-    dx: 0,  // 横方向に動かない
-    dy: -5  // 縦方向のみで上に飛ぶ
-  });
-}
-
+// ゲームの更新
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -103,7 +107,7 @@ function update() {
   const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
   backgroundOffset += 2;
 
-  // 背景線
+  // 背景線の描画
   ctx.strokeStyle = "#333";
   for (let i = 0; i < canvas.height / 40; i++) {
     let y = (i * 40 + backgroundOffset) % canvas.height;
@@ -113,6 +117,7 @@ function update() {
     ctx.stroke();
   }
 
+  // スピードアップ処理
   if (score - lastSpeedUpScore >= 10) {
     playerSpeed += 1;
     enemySpeed = Math.min(enemySpeed + 0.5, 10);
@@ -120,13 +125,14 @@ function update() {
     lastSpeedUpScore = score;
   }
 
-  shoot();
   spawnEnemy();
   spawnRecoveryItem();
 
+  // 弾の移動
   bullets.forEach(b => b.y -= 5);
   bullets = bullets.filter(b => b.y > 0);
 
+  // 敵の移動
   enemies.forEach(e => {
     e.x += e.dx;
     e.y += e.dy;
@@ -157,20 +163,6 @@ function update() {
     }
   }
 
-  // 松永（青の敵）とぎんとの衝突判定
-  enemies.forEach((e) => {
-    if (e.type === "blue" && e.x < player.x + player.width && e.x + e.width > player.x && e.y < player.y + player.height && e.y + e.height > player.y) {
-      if (invincibleTimer <= 0) {
-        lives -= 1;
-        invincibleTimer = 60; // 無敵時間
-        if (lives <= 0) {
-          gameState = "gameover"; // 残機が0になったらゲームオーバー
-        }
-      }
-      enemies.splice(enemies.indexOf(e), 1); // 松永がぎんとに触れたら松永を削除
-    }
-  });
-
   if (invincibleTimer > 0) invincibleTimer--;
 
   recoveryItems = recoveryItems.filter(item => {
@@ -185,7 +177,7 @@ function update() {
     return item.y < canvas.height;
   });
 
-  // 描画
+  // プレイヤーの描画
   ctx.drawImage(gintoImg, player.x, player.y, player.width, player.height);
   bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
   enemies.forEach(e => {
@@ -197,12 +189,16 @@ function update() {
   });
 
   drawText(`偏差値: ${score}`, 10, 30, 20, "white", "left");
-  drawText(`TIME: ${elapsedTime}s`, 10, 60, 20, "white", "left");
+  drawText(`TIME: ${Math.floor((Date.now() - startTime) / 1000)}s`, 10, 60, 20, "white", "left");
   drawLives();
 }
 
-canvas.addEventListener("touchstart", () => {
-  if (gameState === "title" || gameState === "gameover") {
+// タッチイベントで弾発射
+canvas.addEventListener("touchstart", (e) => {
+  if (gameState === "playing") {
+    shoot();  // 弾を発射
+  } else if (gameState === "title" || gameState === "gameover") {
+    // ゲームスタート
     gameState = "playing";
     score = 0;
     lives = 3;
@@ -218,21 +214,7 @@ canvas.addEventListener("touchstart", () => {
   }
 });
 
-let lastTouchX = null;
-canvas.addEventListener("touchmove", e => {
-  e.preventDefault();
-  const touch = e.touches[0];
-  if (lastTouchX !== null) {
-    const dx = touch.clientX - lastTouchX;
-    player.x += dx * 1.5;
-    player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
-  }
-  lastTouchX = touch.clientX;
-});
-canvas.addEventListener("touchend", () => {
-  lastTouchX = null;
-});
-
+// ゲームループ
 function gameLoop() {
   update();
   requestAnimationFrame(gameLoop);
