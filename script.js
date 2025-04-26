@@ -162,6 +162,22 @@ function update() {
       }
     }
   }
+  // ぎんとと松永の衝突判定
+for (let i = enemies.length - 1; i >= 0; i--) {
+  const e = enemies[i];
+  const hitPlayer =
+    player.x < e.x + e.width &&
+    player.x + player.width > e.x &&
+    player.y < e.y + e.height &&
+    player.y + player.height > e.y;
+
+  if (hitPlayer && e.type === "blue" && invincibleTimer <= 0) {
+    lives -= 1;
+    invincibleTimer = 60;
+    if (lives <= 0) gameState = "gameover";
+    enemies.splice(i, 1);
+  }
+}
 
   if (invincibleTimer > 0) invincibleTimer--;
 
@@ -176,6 +192,8 @@ function update() {
     }
     return item.y < canvas.height;
   });
+
+  
 
   // プレイヤーの描画
   ctx.drawImage(gintoImg, player.x, player.y, player.width, player.height);
