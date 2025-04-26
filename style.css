@@ -6,7 +6,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Arial', sans-serif;
 }
 
 .game-container {
@@ -37,15 +36,4 @@ canvas {
   color: white;
   font-size: 24px;
   z-index: 2;
-}
-
-#title {
-  color: white;
-  font-size: 48px;
-  text-align: center;
-  font-weight: bold;
-  position: absolute;
-  top: 50px;
-  left: 50%;
-  transform: translateX(-50%);
 }
