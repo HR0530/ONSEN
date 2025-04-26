@@ -1,6 +1,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+canvas.width = 400;
+canvas.height = 700;
+
 let player = { x: 160, y: 550, width: 40, height: 40 };
 let bullets = [];
 let enemies = [];
