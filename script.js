@@ -4,6 +4,42 @@ const ctx = canvas.getContext("2d");
 canvas.width = 400;
 canvas.height = 700;
 
+let isGameStarted = false;
+let isGameOver = false;
+
+const titleScreen = document.getElementById('titleScreen');
+const gameoverImage = document.getElementById('gameoverImage');
+const gameoverText = document.getElementById('gameoverText');
+
+canvas.addEventListener('click', () => {
+  if (!isGameStarted && !isGameOver) {
+    startGame();
+  } else if (isGameOver) {
+    restartGame();
+  }
+});
+
+function startGame() {
+  isGameStarted = true;
+  titleScreen.style.display = 'none';
+  gameoverImage.style.display = 'none';
+  gameoverText.style.display = 'none';
+  // ゲーム初期化処理呼び出し（自作関数）
+  initGame();
+}
+
+function restartGame() {
+  isGameOver = false;
+  lives = 3;
+  score = 0;
+  enemies = [];
+  recoveryItems = [];
+  isGameStarted = true;
+  gameoverImage.style.display = 'none';
+  gameoverText.style.display = 'none';
+  initGame();
+}
+
 let player = { x: 160, y: 550, width: 40, height: 40 };
 let bullets = [];
 let enemies = [];
@@ -11,14 +47,9 @@ let recoveryItems = [];
 
 let score = 0;
 let lives = 3;
-let isGameOver = false;
-
 let lastEnemyTime = 0;
 let enemySpawnRate = 0.02;
 let lastSpeedUpTime = 0;
-
-const gameoverImage = document.getElementById("gameoverImage");
-const gameoverText = document.getElementById("gameoverText");
 
 canvas.addEventListener("touchmove", (e) => {
   const touch = e.touches[0];
