@@ -8,24 +8,28 @@
 </head>
 <body>
 
-  <div id="titleScreen">
-  <div id="gameTitle">学力爆上げ↑↑<br>モテ期よ、今すぐ来い！<br>ぎんとの青春改造計画</div>
-  <img src="path_to_ginto_image.jpg" id="titleImage">
-  <div id="startText">タップしてスタート</div>
-</div>
-  
   <div class="game-container">
-    <canvas id="gameCanvas" width="360" height="640"></canvas>
+
+    <!-- タイトル画面 -->
+    <div id="titleScreen">
+      <div id="gameTitle">学力爆上げ↑↑<br>モテ期よ、今すぐ来い！<br>ぎんとの青春改造計画</div>
+      <img src="path_to_ginto_image.jpg" id="titleImage">
+      <div id="startText">タップしてスタート</div>
+    </div>
 
     <!-- ゲームオーバー画面 -->
     <img id="gameoverImage" src="gameover_image.jpg" style="display: none;">
-    <div id="gameoverText" style="display: none;">ゲームオーバー</div>
+    <div id="gameoverText" style="display: none;">タップして再スタート</div>
+
+    <!-- ゲームキャンバス -->
+    <canvas id="gameCanvas" width="360" height="640"></canvas>
 
     <!-- キャラクター画像 -->
     <img id="playerImg" src="path_to_ginto_image.jpg" style="display: none;">
     <img id="enemyImg" src="path_to_kyoukasho_image.jpg" style="display: none;">
     <img id="recoveryImg" src="path_to_x_icon.PNG" style="display: none;">
     <img id="dangerImg" src="path_to_matsunaga_image.jpg" style="display: none;">
+
   </div>
 
   <script src="script.js"></script>
