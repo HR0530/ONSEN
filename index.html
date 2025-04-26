@@ -5,11 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>学力爆上げ↑↑ モテ期よ、今すぐ来い！</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* スタイルの追加 */
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    .game-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #titleScreen {
+      text-align: center;
+      color: white;
+      background-color: black;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #gameTitle {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    #startText {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    #gameCanvas {
+      display: none;
+      border: 1px solid black;
+    }
+    #gameoverImage {
+      display: none;
+    }
+    #gameoverText {
+      display: none;
+      color: white;
+      font-size: 24px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
   <div class="game-container">
-
     <!-- タイトル画面 -->
     <div id="titleScreen">
       <div id="gameTitle">学力爆上げ↑↑<br>モテ期よ、今すぐ来い！<br>ぎんとの青春改造計画</div>
@@ -29,7 +76,6 @@
     <img id="enemyImg" src="path_to_kyoukasho_image.jpg" style="display: none;">
     <img id="recoveryImg" src="path_to_x_icon.PNG" style="display: none;">
     <img id="dangerImg" src="path_to_matsunaga_image.jpg" style="display: none;">
-
   </div>
 
   <script src="script.js"></script>
