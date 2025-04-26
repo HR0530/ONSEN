@@ -71,17 +71,24 @@ function spawnRecoveryItem() {
   }
 }
 
-function shootAuto() {
-  const now = Date.now();
-  if (now - lastShotTime > 500) {
-    bullets.push({
-      x: player.x + player.width / 2 - 2,
-      y: player.y,
-      width: 4,
-      height: 10
-    });
-    lastShotTime = now;
-  }
+function shootBullet(targetX, targetY) {
+  const dx = targetX - player.x;
+  const dy = targetY - player.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const speed = 5;
+
+  // 正規化して速度を設定
+  const velocityX = (dx / distance) * speed;
+  const velocityY = (dy / distance) * speed;
+
+  bullets.push({
+    x: player.x + player.width / 2 - 2,
+    y: player.y,
+    width: 4,
+    height: 10,
+    dx: velocityX,
+    dy: velocityY
+  });
 }
 
 function update() {
@@ -121,12 +128,18 @@ function update() {
     lastSpeedUpScore = score;
   }
 
-  shootAuto();
+  // 弾の自動発射は不要なので削除
+  // shootAuto();
+
   spawnEnemy();
   spawnRecoveryItem();
 
-  bullets.forEach(b => b.y -= 5);
-  bullets = bullets.filter(b => b.y > 0);
+  bullets.forEach(b => {
+    b.x += b.dx;
+    b.y += b.dy;
+  });
+
+  bullets = bullets.filter(b => b.y > 0 && b.x > 0 && b.x < canvas.width);
 
   enemies.forEach(e => {
     e.x += e.dx;
@@ -188,7 +201,7 @@ function update() {
   drawLives();
 }
 
-canvas.addEventListener("touchstart", () => {
+canvas.addEventListener("touchstart", e => {
   if (gameState === "title" || gameState === "gameover") {
     gameState = "playing";
     score = 0;
@@ -203,6 +216,10 @@ canvas.addEventListener("touchstart", () => {
     gameoverImg.style.display = "none";
     startTime = Date.now();
   }
+
+  // 弾を発射する
+  const touch = e.touches[0];
+  shootBullet(touch.clientX, touch.clientY);
 });
 
 let lastTouchX = null;
