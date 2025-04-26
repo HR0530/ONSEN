@@ -88,6 +88,7 @@ function update() {
   if (gameState === "title") {
     drawText("学力爆上げ↑↑", canvas.width / 2, 250, 36, "white");
     drawText("モテ期よ、今すぐ来い！", canvas.width / 2, 300, 24, "white");
+    drawText("ぎんとの青春改造計画", canvas.width / 2, 350, 24, "yellow");
     drawText("タップでスタート", canvas.width / 2, 400, 20, "gray");
     return;
   }
