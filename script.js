@@ -178,10 +178,11 @@ function update() {
   drawLives();
 }
 
+let startX = 0;
 let isTouching = false;
 
 // ゲームスタート時の初期化
-canvas.addEventListener("touchstart", () => {
+canvas.addEventListener("touchstart", (e) => {
   if (gameState === "title" || gameState === "gameover") {
     gameState = "playing";
     score = 0;
@@ -196,13 +197,20 @@ canvas.addEventListener("touchstart", () => {
     gameoverImg.style.display = "none";
     startTime = Date.now();
   }
+
+  const touch = e.touches[0];
+  startX = touch.clientX;
+  isTouching = true;
 });
 
-// プレイヤーの移動処理
+// プレイヤーの移動処理（スライド）
 canvas.addEventListener("touchmove", (e) => {
   if (!isTouching) return;
   const touch = e.touches[0];
-  player.x = touch.clientX - player.width / 2;
+  const dx = touch.clientX - startX;
+  player.x += dx; // スライドの距離だけ移動
+  startX = touch.clientX; // 新しいタッチ位置を保存
+  player.x = Math.max(0, Math.min(player.x, canvas.width - player.width)); // 範囲外に出ないように
 });
 
 canvas.addEventListener("touchend", () => {
