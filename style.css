@@ -8,6 +8,15 @@ body {
   align-items: center;
 }
 
+#gameTitle {
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
 .game-container {
   position: relative;
   width: 400px;  /* ← 固定サイズにしたい幅 */
