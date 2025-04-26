@@ -90,9 +90,8 @@ function isColliding(a, b) {
 }
 
 // 衝突処理
-// プレイヤーとアイテムの衝突判定
 function checkCollisions() {
-  // 教科書に当たったらスコア+1
+  // 教科書（赤）に当たったらスコア+1
   for (let i = enemies.length - 1; i >= 0; i--) {
     if (enemies[i].type === "red" && isColliding(player, enemies[i])) {
       score += 1;
@@ -100,7 +99,7 @@ function checkCollisions() {
     }
   }
 
-  // 松永に当たったらライフ-1
+  // 松永（青）に当たったらライフ-1
   for (let i = enemies.length - 1; i >= 0; i--) {
     if (enemies[i].type === "blue" && isColliding(player, enemies[i])) {
       lives -= 1;
@@ -112,7 +111,18 @@ function checkCollisions() {
       }
     }
   }
+
+  // 緑アイテム（回復）に当たったらライフ+1（最大3まで）
+  for (let i = recoveryItems.length - 1; i >= 0; i--) {
+    if (isColliding(player, recoveryItems[i])) {
+      if (lives < 3) {
+        lives++;
+      }
+      recoveryItems.splice(i, 1); // 回復アイテムを消す
+    }
+  }
 }
+
 
 // ゲームの更新
 function update() {
