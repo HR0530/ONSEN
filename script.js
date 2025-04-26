@@ -212,6 +212,19 @@ for (let i = enemies.length - 1; i >= 0; i--) {
 
 let isTouching = false;
 
+// 弾を撃つ処理（300ms制限付き）
+function shoot() {
+  const now = Date.now();
+  if (now - lastShotTime < 300) return; // 300ms間隔
+  lastShotTime = now;
+  bullets.push({
+    x: player.x + player.width / 2 - 2,
+    y: player.y,
+    width: 4,
+    height: 10
+  });
+}
+
 canvas.addEventListener("touchstart", (e) => {
   if (gameState === "playing") {
     shoot(); // タップで弾を撃つ
@@ -238,6 +251,7 @@ canvas.addEventListener("touchmove", (e) => {
   const touch = e.touches[0];
   player.x = touch.clientX - player.width / 2;
 });
+
 
 canvas.addEventListener("touchend", () => {
   isTouching = false;
