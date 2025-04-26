@@ -1,150 +1,227 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const playerImg = new Image();
-playerImg.src = 'path_to_ginto_image.jpg';
+// 画像
+const gintoImg = new Image();
+gintoImg.src = "path_to_ginto_image.jpg";
+const redImg = new Image();
+redImg.src = "path_to_kyoukasho_image.jpg";
+const blueImg = new Image();
+blueImg.src = "path_to_matsunaga_image.jpg";
+const greenImg = new Image();
+greenImg.src = "path_to_x_icon.PNG";
 
-const enemyImg = new Image();
-enemyImg.src = 'path_to_kyoukasho_image.jpg';
+let gameState = "title"; // "title", "playing", "gameover"
 
-const dangerImg = new Image();
-dangerImg.src = 'path_to_matsunaga_image.jpg';
-
-const recoveryImg = new Image();
-recoveryImg.src = 'path_to_x_icon.PNG';
-
-const gameoverImg = document.getElementById('gameoverImage');
-
-let player = {
-  x: canvas.width / 2,
-  y: canvas.height - 100,
-  width: 50,
-  height: 50
-};
-
+const player = { x: canvas.width / 2 - 25, y: canvas.height - 100, width: 50, height: 50 };
 let score = 0;
 let lives = 3;
-let items = [];
-let speed = 2;
-let gameOver = false;
-let isTouching = false;
-let lastTouchX = null;
+let enemies = [];
+let recoveryItems = [];
+let bullets = [];
+let lastShotTime = 0;
+let startTime = null;
+let invincibleTimer = 0;
+let backgroundOffset = 0;
+let lastSpeedUpScore = 0;
+let playerSpeed = 10;
+let enemySpeed = 2;
+let enemySpawnRate = 0.02;
+let gameoverImg = document.getElementById("gameoverImage");
 
-function drawPlayer() {
-  ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+function drawText(text, x, y, size = 24, color = "white", align = "center") {
+  ctx.font = `${size}px Arial`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.fillText(text, x, y);
 }
 
-function drawItems() {
-  for (let item of items) {
-    let img;
-    switch (item.type) {
-      case 'score': img = enemyImg; break;
-      case 'danger': img = dangerImg; break;
-      case 'life': img = recoveryImg; break;
-    }
-    ctx.drawImage(img, item.x, item.y, item.size, item.size);
+function drawLives() {
+  for (let i = 0; i < 3; i++) {
+    drawText(i < lives ? "♥" : "♡", canvas.width - 80 + i * 20, 30, 24, "pink", "left");
   }
 }
 
-function updateItems() {
-  for (let item of items) {
-    item.y += speed;
-  }
-
-  items = items.filter(item => item.y < canvas.height);
-}
-
-function checkCollisions() {
-  for (let i = items.length - 1; i >= 0; i--) {
-    const item = items[i];
-    const dx = player.x + player.width / 2 - (item.x + item.size / 2);
-    const dy = player.y + player.height / 2 - (item.y + item.size / 2);
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const combinedRadius = (player.width + item.size) / 2;
-
-    if (distance < combinedRadius) {
-      if (item.type === 'score') {
-        score++;
-      } else if (item.type === 'danger') {
-        lives--;
-        if (lives <= 0) {
-          gameOver = true;
-          showGameOver();
-        }
-      } else if (item.type === 'life') {
-        lives = Math.min(lives + 1, 3);
-      }
-      items.splice(i, 1);
-    }
+function spawnEnemy() {
+  if (Math.random() < enemySpawnRate) {
+    const isMatsunaga = Math.random() < 1 / 3;
+    enemies.push({
+      x: Math.random() * (canvas.width - 40),
+      y: -40,
+      width: 40,
+      height: 40,
+      type: isMatsunaga ? "blue" : "red",
+      dx: (Math.random() - 0.5) * 6,
+      dy: Math.random() * 1 + 1.5
+    });
   }
 }
 
-function showGameOver() {
-  gameoverImg.style.display = 'block';
-}
-
-function spawnItem() {
-  const types = ['score', 'danger', 'life'];
-  const type = types[Math.floor(Math.random() * types.length)];
-  const size = 50;
-  const x = Math.random() * (canvas.width - size);
-  items.push({ x, y: -size, size, type });
-}
-
-function drawUI() {
-  ctx.fillStyle = 'white';
-  ctx.font = '24px Arial';
-  ctx.fillText(`偏差値: ${score}`, 20, 40);
-
-  for (let i = 0; i < lives; i++) {
-    ctx.drawImage(recoveryImg, 20 + i * 40, 60, 30, 30);
+function spawnRecoveryItem() {
+  if (Math.random() < 0.0001) {
+    recoveryItems.push({
+      x: Math.random() * (canvas.width - 20),
+      y: -20,
+      width: 20,
+      height: 20,
+      speed: 2
+    });
   }
 }
 
-function updateSpeed() {
-  if (score % 20 === 0 && score !== 0) {
-    speed += 0.5;
+function shootAuto() {
+  const now = Date.now();
+  if (now - lastShotTime > 500) {
+    bullets.push({
+      x: player.x + player.width / 2 - 2,
+      y: player.y,
+      width: 4,
+      height: 10
+    });
+    lastShotTime = now;
   }
 }
 
-function gameLoop() {
-  if (gameOver) return;
-
+function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawPlayer();
-  drawItems();
-  updateItems();
-  checkCollisions();
-  drawUI();
-  updateSpeed();
+  if (gameState === "title") {
+    drawText("学力爆上げ↑↑", canvas.width / 2, 250, 36, "white");
+    drawText("モテ期よ、今すぐ来い！", canvas.width / 2, 300, 24, "white");
+    drawText("タップでスタート", canvas.width / 2, 400, 20, "gray");
+    return;
+  }
 
-  requestAnimationFrame(gameLoop);
+  if (gameState === "gameover") {
+    drawText("GAME OVER", canvas.width / 2, 280, 40, "red");
+    drawText(`偏差値: ${score}`, canvas.width / 2, 330, 20);
+    gameoverImg.style.display = "block";
+    return;
+  }
+
+  const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+  backgroundOffset += 2;
+
+  // 背景線
+  ctx.strokeStyle = "#333";
+  for (let i = 0; i < canvas.height / 40; i++) {
+    let y = (i * 40 + backgroundOffset) % canvas.height;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
+  if (score - lastSpeedUpScore >= 10) {
+    playerSpeed += 1;
+    enemySpeed = Math.min(enemySpeed + 0.5, 10);
+    enemySpawnRate = Math.min(enemySpawnRate + 0.005, 0.08);
+    lastSpeedUpScore = score;
+  }
+
+  shootAuto();
+  spawnEnemy();
+  spawnRecoveryItem();
+
+  bullets.forEach(b => b.y -= 5);
+  bullets = bullets.filter(b => b.y > 0);
+
+  enemies.forEach(e => {
+    e.x += e.dx;
+    e.y += e.dy;
+    if (e.x < 0 || e.x > canvas.width - e.width) e.dx *= -1;
+  });
+  enemies = enemies.filter(e => e.y < canvas.height);
+
+  recoveryItems.forEach(item => item.y += item.speed);
+
+  // 衝突処理
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    for (let j = bullets.length - 1; j >= 0; j--) {
+      const b = bullets[j];
+      if (b.x < e.x + e.width && b.x + b.width > e.x && b.y < e.y + e.height && b.y + b.height > e.y) {
+        if (e.type === "red") score += 1;
+        else if (e.type === "blue") {
+          if (invincibleTimer <= 0) {
+            lives -= 1;
+            invincibleTimer = 60;
+            if (lives <= 0) gameState = "gameover";
+          }
+        }
+        enemies.splice(i, 1);
+        bullets.splice(j, 1);
+        break;
+      }
+    }
+  }
+
+  if (invincibleTimer > 0) invincibleTimer--;
+
+  recoveryItems = recoveryItems.filter(item => {
+    const hit = player.x < item.x + item.width &&
+                player.x + player.width > item.x &&
+                player.y < item.y + item.height &&
+                player.y + player.height > item.y;
+    if (hit && lives < 3) {
+      lives++;
+      return false;
+    }
+    return item.y < canvas.height;
+  });
+
+  // 描画
+  ctx.drawImage(gintoImg, player.x, player.y, player.width, player.height);
+  bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+  enemies.forEach(e => {
+    const img = e.type === "red" ? redImg : blueImg;
+    ctx.drawImage(img, e.x, e.y, e.width, e.height);
+  });
+  recoveryItems.forEach(item => {
+    ctx.drawImage(greenImg, item.x, item.y, item.width, item.height);
+  });
+
+  drawText(`偏差値: ${score}`, 10, 30, 20, "white", "left");
+  drawText(`TIME: ${elapsedTime}s`, 10, 60, 20, "white", "left");
+  drawLives();
 }
 
-setInterval(spawnItem, 1000);
-
-// タッチ操作
-canvas.addEventListener('touchstart', (e) => {
-  isTouching = true;
-  lastTouchX = e.touches[0].clientX;
+canvas.addEventListener("touchstart", () => {
+  if (gameState === "title" || gameState === "gameover") {
+    gameState = "playing";
+    score = 0;
+    lives = 3;
+    enemies = [];
+    bullets = [];
+    recoveryItems = [];
+    player.x = canvas.width / 2 - 25;
+    playerSpeed = 10;
+    enemySpeed = 2;
+    enemySpawnRate = 0.02;
+    gameoverImg.style.display = "none";
+    startTime = Date.now();
+  }
 });
 
-canvas.addEventListener('touchmove', (e) => {
-  if (!isTouching) return;
-  const touchX = e.touches[0].clientX;
-  const dx = touchX - lastTouchX;
-  player.x += dx;
-  player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
-  lastTouchX = touchX;
+let lastTouchX = null;
+canvas.addEventListener("touchmove", e => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  if (lastTouchX !== null) {
+    const dx = touch.clientX - lastTouchX;
+    player.x += dx * 1.5;
+    player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+  }
+  lastTouchX = touch.clientX;
 });
-
-canvas.addEventListener('touchend', () => {
-  isTouching = false;
+canvas.addEventListener("touchend", () => {
   lastTouchX = null;
 });
 
-// 開始
+function gameLoop() {
+  update();
+  requestAnimationFrame(gameLoop);
+}
 gameLoop();
