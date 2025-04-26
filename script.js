@@ -2,7 +2,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 canvas.width = 400;
-canvas.height = 700;
+canvas.height = 600;
 
 let isGameStarted = false;
 let isGameOver = false;
@@ -21,9 +21,10 @@ canvas.addEventListener('click', () => {
 
 function startGame() {
   isGameStarted = true;
-  titleScreen.style.display = 'none';
+  titleScreen.style.display = 'none';  // タイトル画面を非表示にする
   gameoverImage.style.display = 'none';
   gameoverText.style.display = 'none';
+  canvas.style.display = 'block';  // ゲーム画面を表示
   // ゲーム初期化処理呼び出し（自作関数）
   initGame();
 }
@@ -55,7 +56,14 @@ canvas.addEventListener("touchmove", (e) => {
   const touch = e.touches[0];
   const rect = canvas.getBoundingClientRect();
   player.x = touch.clientX - rect.left - player.width / 2;
-  player.y = touch.clientY - rect.top - player.height / 2;
+  // プレイヤーは横移動のみ
+  player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+});
+
+canvas.addEventListener("click", () => {
+  if (isGameStarted && !isGameOver) {
+    shoot(); // 任意で弾を発射
+  }
 });
 
 function drawText(text, x, y, color = "white", size = "20px") {
@@ -172,7 +180,7 @@ function shoot() {
   });
 }
 
-setInterval(shoot, 300);
+setInterval(shoot, 300); // クリックで発射できるように、こちらも修正
 
 function gameLoop(timestamp) {
   if (isGameOver) return;
