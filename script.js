@@ -46,16 +46,6 @@ function drawLives() {
   }
 }
 
-// 弾の発射
-function shoot() {
-  bullets.push({
-    x: player.x + player.width / 2 - 2,
-    y: player.y,
-    width: 4,
-    height: 10
-  });
-}
-
 // 敵の生成
 function spawnEnemy() {
   if (Math.random() < enemySpawnRate) {
@@ -65,7 +55,7 @@ function spawnEnemy() {
       y: -40,
       width: 40,
       height: 40,
-      type: isMatsunaga ? "blue" : "red",
+      type: isMatsunaga ? "blue" : "red", // 青は松永、赤は教科書
       dx: (Math.random() - 0.5) * 6,
       dy: Math.random() * 1 + 1.5
     });
@@ -82,6 +72,38 @@ function spawnRecoveryItem() {
       height: 20,
       speed: 2
     });
+  }
+}
+
+// 衝突判定関数
+function isColliding(a, b) {
+  return a.x < b.x + b.width &&
+         a.x + a.width > b.x &&
+         a.y < b.y + b.height &&
+         a.y + a.height > b.y;
+}
+
+// 衝突処理
+function checkCollisions() {
+  // 教科書に当たったらスコア+1
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    if (enemies[i].type === "red" && isColliding(player, enemies[i])) {
+      score += 1;
+      enemies.splice(i, 1); // 教科書を消す
+    }
+  }
+
+  // 松永に当たったらライフ-1
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    if (enemies[i].type === "blue" && isColliding(player, enemies[i])) {
+      lives -= 1;
+      enemies.splice(i, 1); // 松永を消す
+
+      if (lives <= 0) {
+        gameState = "gameover";
+        gameoverImg.style.display = "block";
+      }
+    }
   }
 }
 
@@ -128,10 +150,6 @@ function update() {
   spawnEnemy();
   spawnRecoveryItem();
 
-  // 弾の移動
-  bullets.forEach(b => b.y -= 5);
-  bullets = bullets.filter(b => b.y > 0);
-
   // 敵の移動
   enemies.forEach(e => {
     e.x += e.dx;
@@ -142,61 +160,11 @@ function update() {
 
   recoveryItems.forEach(item => item.y += item.speed);
 
-  // 衝突処理
-  for (let i = enemies.length - 1; i >= 0; i--) {
-    const e = enemies[i];
-    for (let j = bullets.length - 1; j >= 0; j--) {
-      const b = bullets[j];
-      if (b.x < e.x + e.width && b.x + b.width > e.x && b.y < e.y + e.height && b.y + b.height > e.y) {
-        if (e.type === "red") score += 1;
-        else if (e.type === "blue") {
-          if (invincibleTimer <= 0) {
-            lives -= 1;
-            invincibleTimer = 60;
-            if (lives <= 0) gameState = "gameover";
-          }
-        }
-        enemies.splice(i, 1);
-        bullets.splice(j, 1);
-        break;
-      }
-    }
-  }
-
-  // ぎんとと松永の衝突判定
-for (let i = enemies.length - 1; i >= 0; i--) {
-  const e = enemies[i];
-  const hitPlayer =
-    player.x < e.x + e.width &&
-    player.x + player.width > e.x &&
-    player.y < e.y + e.height &&
-    player.y + player.height > e.y;
-
-  if (hitPlayer && e.type === "blue" && invincibleTimer <= 0) {
-    lives -= 1;
-    invincibleTimer = 60;
-    if (lives <= 0) gameState = "gameover";
-    enemies.splice(i, 1);
-  }
-}
-
-  if (invincibleTimer > 0) invincibleTimer--;
-
-  recoveryItems = recoveryItems.filter(item => {
-    const hit = player.x < item.x + item.width &&
-                player.x + player.width > item.x &&
-                player.y < item.y + item.height &&
-                player.y + player.height > item.y;
-    if (hit && lives < 3) {
-      lives++;
-      return false;
-    }
-    return item.y < canvas.height;
-  });
+  // 衝突チェック
+  checkCollisions();
 
   // プレイヤーの描画
   ctx.drawImage(gintoImg, player.x, player.y, player.width, player.height);
-  bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
   enemies.forEach(e => {
     const img = e.type === "red" ? redImg : blueImg;
     ctx.drawImage(img, e.x, e.y, e.width, e.height);
@@ -212,25 +180,9 @@ for (let i = enemies.length - 1; i >= 0; i--) {
 
 let isTouching = false;
 
-// 弾を撃つ処理（300ms制限付き）
-function shoot() {
-  const now = Date.now();
-  if (now - lastShotTime < 300) return; // 300ms間隔
-  lastShotTime = now;
-  bullets.push({
-    x: player.x + player.width / 2 - 2,
-    y: player.y,
-    width: 4,
-    height: 10
-  });
-}
-
-canvas.addEventListener("touchstart", (e) => {
-  if (gameState === "playing") {
-    shoot(); // タップで弾を撃つ
-    isTouching = true;
-  } else if (gameState === "title" || gameState === "gameover") {
-    // ゲームスタート時の初期化
+// ゲームスタート時の初期化
+canvas.addEventListener("touchstart", () => {
+  if (gameState === "title" || gameState === "gameover") {
     gameState = "playing";
     score = 0;
     lives = 3;
@@ -246,17 +198,16 @@ canvas.addEventListener("touchstart", (e) => {
   }
 });
 
+// プレイヤーの移動処理
 canvas.addEventListener("touchmove", (e) => {
   if (!isTouching) return;
   const touch = e.touches[0];
   player.x = touch.clientX - player.width / 2;
 });
 
-
 canvas.addEventListener("touchend", () => {
   isTouching = false;
 });
-
 
 // ゲームループ
 function gameLoop() {
