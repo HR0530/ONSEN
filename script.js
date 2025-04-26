@@ -91,27 +91,6 @@ function isColliding(a, b) {
 
 // 衝突処理
 // プレイヤーとアイテムの衝突判定
-items.forEach((item, index) => {
-  if (
-    player.x < item.x + item.size &&
-    player.x + player.width > item.x &&
-    player.y < item.y + item.size &&
-    player.y + player.height > item.y
-  ) {
-    if (item.type === 'green') {
-      // 緑アイテム：ライフ回復（最大3まで）
-      if (lives < 3) {
-        lives++;
-        updateLivesDisplay(); // ライフ表示を更新する関数がある場合
-      }
-    }
-
-    // 他の処理（赤ならダメージ、青ならスコア、など）もここに続く
-    items.splice(index, 1); // アイテム消去
-  }
-});
-
-
 function checkCollisions() {
   // 教科書に当たったらスコア+1
   for (let i = enemies.length - 1; i >= 0; i--) {
