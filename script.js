@@ -70,7 +70,7 @@ function spawnEnemy() {
 
 // 回復アイテムの生成
 function spawnRecoveryItem() {
-  if (Math.random() < 0.0001) {
+  if (Math.random() < 0.001) {
     recoveryItems.push({
       x: Math.random() * (canvas.width - 20),
       y: -20,
@@ -90,25 +90,33 @@ function isColliding(a, b) {
 }
 
 // 衝突処理
+// プレイヤーとアイテムの衝突判定
 function checkCollisions() {
-  // 教科書に当たったらスコア+1
+  // 敵（赤・青）の処理
   for (let i = enemies.length - 1; i >= 0; i--) {
     if (enemies[i].type === "red" && isColliding(player, enemies[i])) {
       score += 1;
-      enemies.splice(i, 1); // 教科書を消す
-    }
-  }
-
-  // 松永に当たったらライフ-1
-  for (let i = enemies.length - 1; i >= 0; i--) {
-    if (enemies[i].type === "blue" && isColliding(player, enemies[i])) {
+      enemies.splice(i, 1);
+    } else if (enemies[i].type === "blue" && isColliding(player, enemies[i])) {
       lives -= 1;
-      enemies.splice(i, 1); // 松永を消す
-
+      enemies.splice(i, 1);
       if (lives <= 0) {
         gameState = "gameover";
         gameoverImg.style.display = "block";
       }
+    }
+  }
+
+  // アイテム（緑など）の処理
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (isColliding(player, items[i])) {
+      if (items[i].type === "green") {
+        if (lives < 3) {
+          lives++;
+          updateLivesDisplay?.(); // 関数があるなら実行
+        }
+      }
+      items.splice(i, 1); // 衝突したアイテム削除
     }
   }
 }
