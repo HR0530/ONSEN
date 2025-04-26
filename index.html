@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ぎんとがモテ男になるように</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>学力爆上げ↑↑ モテ期よ、今すぐ来い！</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="game-container">
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas" width="360" height="640"></canvas>
+
+    <!-- ゲームオーバー画面 -->
     <img id="gameoverImage" src="gameover_image.jpg" style="display: none;">
-    <div id="gameoverText" style="display: none;">GAME OVER</div>
+    <div id="gameoverText" style="display: none;">ゲームオーバー</div>
+
+    <!-- キャラクター画像 -->
+    <img id="playerImg" src="path_to_ginto_image.jpg" style="display: none;">
+    <img id="enemyImg" src="path_to_kyoukasho_image.jpg" style="display: none;">
+    <img id="recoveryImg" src="path_to_x_icon.PNG" style="display: none;">
+    <img id="dangerImg" src="path_to_matsunaga_image.jpg" style="display: none;">
   </div>
-  <script src="game.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>
