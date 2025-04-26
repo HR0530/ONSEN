@@ -1,8 +1,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 300;
-canvas.height = 500;
+// 画面サイズに合わせたキャンバスの設定
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let isGameStarted = false;
 let isGameOver = false;
@@ -17,6 +18,30 @@ canvas.addEventListener('click', () => {
   } else if (isGameOver) {
     restartGame();
   }
+});
+
+// タッチ開始、移動、終了イベントリスナーを追加
+let touchStartX = 0;
+let touchStartY = 0;
+
+canvas.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+});
+
+canvas.addEventListener("touchmove", (e) => {
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  player.x = touch.clientX - rect.left - player.width / 2;
+  player.y = touch.clientY - rect.top - player.height / 2;
+  e.preventDefault(); // 複数指での誤動作を防ぐ
+});
+
+canvas.addEventListener("touchend", (e) => {
+  // タッチ終了時の処理
+  // ここに必要な処理を追加することができます
+  e.preventDefault();
 });
 
 function startGame() {
@@ -70,13 +95,6 @@ let lastEnemyTime = 0;
 let enemySpawnRate = 0.02;
 let lastSpeedUpTime = 0;
 
-canvas.addEventListener("touchmove", (e) => {
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  player.x = touch.clientX - rect.left - player.width / 2;
-  player.y = touch.clientY - rect.top - player.height / 2;
-});
-
 function drawText(text, x, y, color = "white", size = "20px") {
   ctx.fillStyle = color;
   ctx.font = `${size} sans-serif`;
@@ -85,7 +103,13 @@ function drawText(text, x, y, color = "white", size = "20px") {
 
 function drawImage(obj, id) {
   const img = document.getElementById(id);
-  if (img.complete) ctx.drawImage(img, obj.x, obj.y, obj.width, obj.height);
+  if (img.complete) {
+    ctx.drawImage(img, obj.x, obj.y, obj.width, obj.height);
+  } else {
+    img.onload = () => {
+      ctx.drawImage(img, obj.x, obj.y, obj.width, obj.height);
+    };
+  }
 }
 
 function drawRect(obj, color) {
@@ -183,15 +207,15 @@ function checkCollisions() {
 }
 
 function shoot() {
-  bullets.push({
-    x: player.x + player.width / 2 - 5,
-    y: player.y,
-    width: 10,
-    height: 20
-  });
+  if (isGameStarted && !isGameOver) {
+    bullets.push({
+      x: player.x + player.width / 2 - 5,
+      y: player.y,
+      width: 10,
+      height: 20
+    });
+  }
 }
-
-setInterval(shoot, 300);
 
 function gameLoop(timestamp) {
   if (isGameOver) return;
@@ -222,6 +246,9 @@ function gameLoop(timestamp) {
     enemySpawnRate += 0.005;
     lastSpeedUpTime = timestamp;
   }
+
+  // 弾を毎フレーム撃つ
+  shoot();
 
   requestAnimationFrame(gameLoop);
 }
