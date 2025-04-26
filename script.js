@@ -162,6 +162,7 @@ function update() {
       }
     }
   }
+
   // ぎんとと松永の衝突判定
 for (let i = enemies.length - 1; i >= 0; i--) {
   const e = enemies[i];
@@ -193,8 +194,6 @@ for (let i = enemies.length - 1; i >= 0; i--) {
     return item.y < canvas.height;
   });
 
-  
-
   // プレイヤーの描画
   ctx.drawImage(gintoImg, player.x, player.y, player.width, player.height);
   bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
@@ -211,7 +210,6 @@ for (let i = enemies.length - 1; i >= 0; i--) {
   drawLives();
 }
 
-// タッチイベントで弾発射
 let isTouching = false;
 
 canvas.addEventListener("touchstart", (e) => {
@@ -219,13 +217,14 @@ canvas.addEventListener("touchstart", (e) => {
     shoot(); // タップで弾を撃つ
     isTouching = true;
   } else if (gameState === "title" || gameState === "gameover") {
+    // ゲームスタート時の初期化
     gameState = "playing";
     score = 0;
     lives = 3;
     enemies = [];
     bullets = [];
     recoveryItems = [];
-    player.x = canvas.width / 2 - 25;
+    player.x = canvas.width / 2 - player.width / 2;
     playerSpeed = 10;
     enemySpeed = 2;
     enemySpawnRate = 0.02;
@@ -244,21 +243,6 @@ canvas.addEventListener("touchend", () => {
   isTouching = false;
 });
 
-    // ゲームスタート
-    gameState = "playing";
-    score = 0;
-    lives = 3;
-    enemies = [];
-    bullets = [];
-    recoveryItems = [];
-    player.x = canvas.width / 2 - 25;
-    playerSpeed = 10;
-    enemySpeed = 2;
-    enemySpawnRate = 0.02;
-    gameoverImg.style.display = "none";
-    startTime = Date.now();
-  }
-});
 
 // ゲームループ
 function gameLoop() {
