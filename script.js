@@ -91,32 +91,46 @@ function isColliding(a, b) {
 
 // 衝突処理
 // プレイヤーとアイテムの衝突判定
+items.forEach((item, index) => {
+  if (
+    player.x < item.x + item.size &&
+    player.x + player.width > item.x &&
+    player.y < item.y + item.size &&
+    player.y + player.height > item.y
+  ) {
+    if (item.type === 'green') {
+      // 緑アイテム：ライフ回復（最大3まで）
+      if (lives < 3) {
+        lives++;
+        updateLivesDisplay(); // ライフ表示を更新する関数がある場合
+      }
+    }
+
+    // 他の処理（赤ならダメージ、青ならスコア、など）もここに続く
+    items.splice(index, 1); // アイテム消去
+  }
+});
+
+
 function checkCollisions() {
-  // 敵（赤・青）の処理
+  // 教科書に当たったらスコア+1
   for (let i = enemies.length - 1; i >= 0; i--) {
     if (enemies[i].type === "red" && isColliding(player, enemies[i])) {
       score += 1;
-      enemies.splice(i, 1);
-    } else if (enemies[i].type === "blue" && isColliding(player, enemies[i])) {
+      enemies.splice(i, 1); // 教科書を消す
+    }
+  }
+
+  // 松永に当たったらライフ-1
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    if (enemies[i].type === "blue" && isColliding(player, enemies[i])) {
       lives -= 1;
-      enemies.splice(i, 1);
+      enemies.splice(i, 1); // 松永を消す
+
       if (lives <= 0) {
         gameState = "gameover";
         gameoverImg.style.display = "block";
       }
-    }
-  }
-
-  // アイテム（緑など）の処理
-  for (let i = items.length - 1; i >= 0; i--) {
-    if (isColliding(player, items[i])) {
-      if (items[i].type === "green") {
-        if (lives < 3) {
-          lives++;
-          updateLivesDisplay?.(); // 関数があるなら実行
-        }
-      }
-      items.splice(i, 1); // 衝突したアイテム削除
     }
   }
 }
