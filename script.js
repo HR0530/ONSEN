@@ -3,6 +3,12 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+// スクロールを防ぐ
+document.body.addEventListener("touchmove", (e) => {
+  e.preventDefault();  // スクロールを防止
+}, { passive: false });
+
+
 // 画像の読み込み
 const gintoImg = new Image();
 gintoImg.src = "path_to_ginto_image.jpg";
