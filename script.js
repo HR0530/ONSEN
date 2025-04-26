@@ -194,10 +194,38 @@ function update() {
 }
 
 // タッチイベントで弾発射
+let isTouching = false;
+
 canvas.addEventListener("touchstart", (e) => {
   if (gameState === "playing") {
-    shoot();  // 弾を発射
+    shoot(); // タップで弾を撃つ
+    isTouching = true;
   } else if (gameState === "title" || gameState === "gameover") {
+    gameState = "playing";
+    score = 0;
+    lives = 3;
+    enemies = [];
+    bullets = [];
+    recoveryItems = [];
+    player.x = canvas.width / 2 - 25;
+    playerSpeed = 10;
+    enemySpeed = 2;
+    enemySpawnRate = 0.02;
+    gameoverImg.style.display = "none";
+    startTime = Date.now();
+  }
+});
+
+canvas.addEventListener("touchmove", (e) => {
+  if (!isTouching) return;
+  const touch = e.touches[0];
+  player.x = touch.clientX - player.width / 2;
+});
+
+canvas.addEventListener("touchend", () => {
+  isTouching = false;
+});
+
     // ゲームスタート
     gameState = "playing";
     score = 0;
